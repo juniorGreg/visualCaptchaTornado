@@ -7,4 +7,5 @@ setup(name='visualCaptchaTornado',
       author_email='junior.gregoire@gmail.com',
       url='https://github.com/juniorGreg',
       packages=['visualcaptchatornado'],
+      install_requires=["tornado", "visualcaptcha", "torndsession"]
      )

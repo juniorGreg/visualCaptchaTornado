@@ -1,9 +1,8 @@
-from tornado.web import RequestHandler
 from visualcaptcha import Session, Captcha
 from torndsession.sessionhandler import SessionBaseHandler
 
 
-class VisualCaptchaRequestHanlder(SessionBaseHandler):
+class VisualCaptchaRequestHandler(SessionBaseHandler):
 
     def get(self, cmd, arg=None):
         if cmd == "start":
@@ -30,11 +29,25 @@ class VisualCaptchaRequestHanlder(SessionBaseHandler):
     def post(self, cmd):
         if cmd == "try":
             if self.trySubmission():
-                self.write("ok")
+                self.write("Submission is valid.")
+            else:
+                self.send_error(403)
 
     def trySubmission(self):
+        if self.request.arguments["valid"][0] == "false":
+            return False
+
         visualCaptcha = Captcha(Session(self.session.session))
         frontendData = visualCaptcha.getFrontendData()
-        if frontendData['imageFieldName'] in self.request.arguments:
-            imageFieldName = self.request.arguments[frontendData['imageFieldName']][0]
+
+        if frontendData is None:
+            return False
+
+        if frontendData['imageFieldName'] == self.request.arguments["name"][0]:
+            imageFieldName = self.request.arguments["value"][0]
             return visualCaptcha.validateImage(imageFieldName)
+        elif frontendData['audioFieldName'] == self.request.arguments["name"][0]:
+            audioFieldName = self.request.arguments["value"][0]
+            return visualCaptcha.validateAudio(audioFieldName)
+        else:
+            return False

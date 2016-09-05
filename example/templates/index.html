@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <title>Simple Visual Captcha Tornado Example</title>
+        <link rel="stylesheet" href="resources/bootstrap-3.3.5-dist/css/bootstrap.min.css">
+        <script src="resources/jquery-2.1.4.min.js"></script>
+        <script src="resources/bootstrap-3.3.5-dist/js/bootstrap.min.js"></script>
+
+
+        <link href="resources/visualCaptcha-frontend-jquery/visualcaptcha.css" media="all" rel="stylesheet">
+        <script src="resources/visualCaptcha-frontend-jquery/visualcaptcha.jquery.js"></script>
+        <script>
+             $("document").ready(function(){
+
+				var captcha = $( '#sample-captcha' ).visualCaptcha({
+					imgPath: 'resources/visualCaptcha-frontend-jquery/img/',
+
+					captcha: {
+						numberOfImages: 5,
+						routes:{
+							start: '/visualcaptcha/start',
+							image: '/visualcaptcha/image',
+							audio: '/visualcaptcha/audio',
+						},
+							callbacks: {
+								loading: function( captcha ){
+								console.log( 'I am loading.', captcha );
+							},
+							loaded: function( captcha ){
+								console.log( 'I am loaded.', captcha );
+							},
+
+						}
+					}			
+
+				});
+				
+				var closeAlert = function()
+				{
+					$("#success-alert").hide();	
+					$("#fail-alert").hide();					
+				}
+				
+				$("#validate-captcha-button").click(function(){
+					closeAlert();
+					var captcha_data = captcha.data( 'captcha' ).getCaptchaData();
+					$.post("/visualcaptcha/try", captcha_data).done(
+						function(data, status, error){							
+							$("#success-alert").show();						
+						}
+					).fail(
+						function(data, status, error)
+						{							
+							$("#fail-alert").show();	
+						}					
+					);			
+				});
+				
+				closeAlert();
+				
+			});
+        </script>
+
+</head>
+<body>
+	<div class="container">
+		<div class="jumbotron">
+			<h1>Simple Visual Captcha Tornado</h1>
+			<p>
+				<div id="sample-captcha"></div>
+				<button id="validate-captcha-button">Validate</button>
+			</p>
+		</div>
+		
+		<div id="success-alert" class="alert alert-success">			
+			<strong>Success!</strong> Submission is valid.
+		</div>
+
+		<div id="fail-alert" class="alert alert-danger">			
+			<strong>Fail!</strong> Submission is invalid.
+		</div>
+	</div>
+
+</body>
+</html>
